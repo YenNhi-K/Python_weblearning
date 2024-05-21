@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <title>Game</title>
+</head>
+<body class="image_div_game">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    {% if question %}
+    <div class="container check_game game_content row">
+        <div class="game timer col col-3">
+            <div class="circle time_board">
+                <span id="timer_count" class=" bold-font">10</span>
+            </div>
+        </div>
+        <div class="game_content_item col col-6">
+            <div class="game_question bold-font">
+                {% if question.type == 0 %}
+                <span>"{{question.question}}" nghĩa là gì?</span>
+                {% else %}
+                <span>"{{question.question}}" trong tiếng Anh là gì?</span>
+                {% endif%}
+            </div>
+            <form action="" method="POST" id="check-form">
+                {% csrf_token %}
+                {% if correct is None %}
+                <input type="text" class="form-control game_answer text-center" id="answer" name = "answer"value="">
+                <button type="submit" class="btn single-pink-btn pd-3 d-inline mar-r-1" id="submit-btn">Submit</button>
+                {% elif correct == 0 %}
+                <input type="text" class="form-control game_answer text-center correct_answer" id="answer" name = "answer" value="{{ user_answer }}" readonly>
+                
+                <!-- <input type="hidden" name="no_correct" id="no_correct" value="{{ no_correct }}"> -->
+                {% else %}
+                <input type="text" class="form-control game_answer text-center wrong_answer" id="answer" name = "answer"value="{{ user_answer }}" readonly>
+                <p class="game_result bold-font">Đáp án: {{ question.answer }}</p>
+                {% endif %}
+                
+                <p class="game_result bold-font" style="display: none;">Con người</p>
+            </form>
+        </div>
+        <div class="game_content_btn col col-3">
+            {% if correct is not None %}
+            <a href="" id="test-check-link" class="link-underline link-underline-opacity-0">
+            <btn class="circle btn_board_game">
+                <span id="" class=" bold-font"><i class="fas fa-arrow-right"></i></span>
+            </btn></a>
+            {% endif %}
+        </div>
+
+    </div>
+    {% endif %}
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var testCheckLink = document.getElementById('test-check-link');
+        
+        // Kiểm tra xem nút có tồn tại hay không
+        if (testCheckLink) {
+            testCheckLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                
+                // Kiểm tra giá trị của correct
+                {% if correct is None %}
+                var correct = null;
+                {% else %}
+                var correct = {{ correct }};
+                {% endif %}
+                
+                var no_correct = 0;
+                var no_question;
+                
+                // Nếu correct bằng 0 thì tăng giá trị no_correct
+                if (correct === 0) {
+                    no_correct = {{ no_correct }} + 1;
+                }
+                
+                // Tăng giá trị no_question
+                no_question = {{ no_question }} + 1;
+                console.log(no_question + ' ' + no_correct);
+                
+                // Tạo URL mới
+                var url = "{% url 'test_check' 0 0 %}";
+                var replaced = '/' + no_question + '/' + no_correct + '/';
+                console.log(replaced);
+                
+                // Cắt bỏ 5 ký tự cuối của URL
+                url = url.slice(0, -5);
+                
+                // Tạo URL mới bằng cách nối phần đã cắt và phần thay thế
+                var new_url = url.concat(replaced);
+                
+                console.log(new_url);
+                
+                // Chuyển hướng đến URL mới
+                window.location.href = new_url;
+            });
+        }
+    });
+    // document.getElementById('test-check-link').addEventListener('click', function(event) {
+    //     event.preventDefault();
+    //     // var correct = {{ correct }};
+    //     {% if correct is None %}
+    //     var correct = null;
+    //     {% else %}
+    //     var correct = {{ correct }};
+    //     {% endif %}
+    //     var no_correct = 0;
+    //     var no_question;
+        
+    //     if (correct == 0) {
+    //         // var no_correct = parseInt(document.getElementById('no_correct').value, 10);
+    //         // document.getElementById('no_correct').value = no_correct + 1;
+    //         no_correct = {{no_correct}} + 1;
+    //     }
+    //     no_question = {{no_question}} + 1;
+    //     console.log(no_question + ' ' + no_correct);
+    //     // var url = "{% url 'test_check' 0 0 %}".replace('/0/0/', '/' + no_question + '/' + no_correct + '/');
+    //     var url = "{% url 'test_check' 0 0 %}";
+    //     replaced = '/' + no_question + '/' + no_correct + '/';
+    //     console.log(replaced);
+    //     url = url.slice(0,-5);
+
+    //     new_url = url.concat(replaced);
+        
+    //     console.log(new_url);
+    //     window.location.href = new_url;
+    // });
+
+    document.getElementById("check-form").addEventListener("submit", function(event) {
+        // Ngăn chặn hành động mặc định của sự kiện submit
+        event.preventDefault();
+
+        // Lấy giá trị của input 'answer'
+        var answerValue = document.getElementById("answer").value;
+        {% if correct is None %}
+        var correct = null;
+        {% else %}
+        var correct = {{ correct }};
+        {% endif %}
+        var no_correct = 0;
+        var no_question;
+        
+        if (correct == 0) {
+            // var no_correct = parseInt(document.getElementById('no_correct').value, 10);
+            // document.getElementById('no_correct').value = no_correct + 1;
+            no_correct = {{no_correct}} + 1;
+        }
+        no_question = {{no_question}};
+        // Xây dựng URL mới
+        var url = "{% url 'test_check' 0 0 %}";
+        var replaced = '/' + no_question + '/' + no_correct + '/';
+        url = url.slice(0, -5) + replaced;
+
+        // Cập nhật thuộc tính action của form
+        document.getElementById("check-form").action = url;
+
+        // Gửi form đi
+        this.submit();
+    });
+    // Đối tượng hẹn giờ
+    var timer;
+    var seconds = 10; // Thời gian đếm ngược ban đầu
+    var formSubmitted = false;
+    // Hàm bắt đầu đếm thời gian và cập nhật hiển thị
+    function startTimer() {
+        timer = setInterval(function() {
+            // Giảm thời gian mỗi giây
+            seconds--;
+
+            // Cập nhật hiển thị thời gian
+            document.getElementById("timer_count").textContent = seconds;
+
+            // Nếu thời gian hết
+            if (seconds <= 0 && !formSubmitted) {
+                clearInterval(timer);
+                // Submit form
+                var answerValue = document.getElementById("answer").value;
+                {% if correct is None %}
+                var correct = null;
+                {% else %}
+                var correct = {{ correct }};
+                {% endif %}
+                var no_correct = 0;
+                var no_question;
+                
+                if (correct == 0) {
+                    // var no_correct = parseInt(document.getElementById('no_correct').value, 10);
+                    // document.getElementById('no_correct').value = no_correct + 1;
+                    no_correct = {{no_correct}} + 1;
+                }
+                no_question = {{no_question}};
+                // Xây dựng URL mới
+                var url = "{% url 'test_check' 0 0 %}";
+                var replaced = '/' + no_question + '/' + no_correct + '/';
+                url = url.slice(0, -5) + replaced;
+
+                // Cập nhật thuộc tính action của form
+                document.getElementById("check-form").action = url;
+
+                document.getElementById("check-form").submit();
+                formSubmitted = true;
+            }
+        }, 1000); // Mỗi 1000 ms (1 giây)
+    }
+    var submitBtn = document.getElementById("submit-btn");
+    // Bắt đầu đếm thời gian khi trang được load
+    if (submitBtn){
+        startTimer();
+    }
+    
+</script>
+</html>
