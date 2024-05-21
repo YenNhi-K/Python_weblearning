@@ -30,7 +30,7 @@
                 {% csrf_token %}
                 {% if correct is None %}
                 <input type="text" class="form-control game_answer text-center" id="answer" name = "answer"value="">
-                <button type="submit" class="btn single-pink-btn pd-3 d-inline mar-r-1" id="submit-btn">Submit</button>
+                <button type="submit" class="btn" id="submit-btn" hidden>Submit</button>
                 {% elif correct == 0 %}
                 <input type="text" class="form-control game_answer text-center correct_answer" id="answer" name = "answer" value="{{ user_answer }}" readonly>
                 
@@ -58,7 +58,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var testCheckLink = document.getElementById('test-check-link');
-        
         // Kiểm tra xem nút có tồn tại hay không
         if (testCheckLink) {
             testCheckLink.addEventListener('click', function(event) {
@@ -71,10 +70,10 @@
                 var correct = {{ correct }};
                 {% endif %}
                 
-                var no_correct = 0;
+                var no_correct = {{ no_correct }};
                 var no_question;
                 
-                // Nếu correct bằng 0 thì tăng giá trị no_correct
+                // Nếu correct bằng 0 thì tăng giá trị no_correct // đúng
                 if (correct === 0) {
                     no_correct = {{ no_correct }} + 1;
                 }
@@ -142,7 +141,7 @@
         {% else %}
         var correct = {{ correct }};
         {% endif %}
-        var no_correct = 0;
+        var no_correct = {{no_correct}};
         var no_question;
         
         if (correct == 0) {
@@ -185,7 +184,7 @@
                 {% else %}
                 var correct = {{ correct }};
                 {% endif %}
-                var no_correct = 0;
+                var no_correct = {{no_correct}};
                 var no_question;
                 
                 if (correct == 0) {
