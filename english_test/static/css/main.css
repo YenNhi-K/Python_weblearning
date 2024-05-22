@@ -91,6 +91,10 @@ html{
     background-color: rgba(245, 20, 96, 0.5) ;
 }
 
+.dis-btn{
+    filter: brightness(0.5);
+}
+
 .pass:hover{
     cursor: pointer;
     background-color: rgba(255,255,255,0.5);
@@ -163,7 +167,7 @@ html{
     color: #E81486;
     text-align: right;
     font-weight: bold;
-    font-size: 22px;
+    font-size: 20px;
 }
 
 .page-link-text{
@@ -315,4 +319,3 @@ html{
     background-color: #F378BB;
     color: #FFF;
 }
-

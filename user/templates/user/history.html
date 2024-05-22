@@ -29,7 +29,6 @@
         </div>
       </nav>
     <div class="full-high container main-content">
-        {% if list %}
         <p class="text-title">Lịch sử làm bài của {{ test.topic }}<i style="font-size: 20px" class="mar-l-1 fas fa-clock"></i></p>
         <div class="list-game mt-5 col table-hover">
             <div class="row list-game-history__item" id="header">
@@ -38,33 +37,41 @@
                 <div class="col text-center bold-font" id="game_result" style="color: #E81486;">Kết quả</div>
                 
             </div>
+            {% if list %}
             {% for item in list %}
             <div class="row list-game-history__item">
                 <div class="col text-center" id="game_time">{{ item.test_time|date:"d/m/Y" }} {{ item.test_time|time:"H:i" }}</div>
                 <div class="col text-center" id="game_time">{% if item.type%} Quiz {% else %} Check {% endif %}</div>
                 <div class="col text-center bold-font" id="game_result" style="color: #E81486;">{{ item.result }} / {{ item.number_of_questions }} </div>
-                
             </div>
             {% endfor %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination mt-5 justify-content-center">
+                    <li class="page-item previous-page">
+                        <a class="page-link page-link-text" href=""><i class="fas fa-arrow-left"></i></a>
+                    </li>
+                    <li class="page-item"><p class="page-link" id="currentPage" style="background-color: #E791C0; color: #FFF;"></p></li>
+                    <li class="page-item next-page">
+                        <a class="page-link page-link-text" href=""><i class="fas fa-arrow-right"></i></a>
+                    </li>
+                </ul>
+              </nav>
+            {% else %}
+            <div class="row">
+                <label class="col text-center mt-2">Chưa có lịch sử ~.~</label>
+            </div>
         </div>
         {% endif %}
-        <nav aria-label="Page navigation">
-            <ul class="pagination mt-5 justify-content-center">
-                <li class="page-item">
-                    <a class="page-link page-link-text" href=""><i class="fas fa-arrow-left"></i></a>
-                </li>
-                <li class="page-item"><p class="page-link" id="currentPage" style="background-color: #E791C0; color: #FFF;"></p></li>
-                <li class="page-item">
-                    <a class="page-link page-link-text" href=""><i class="fas fa-arrow-right"></i></a>
-                </li>
-            </ul>
-          </nav>
     </div>
 </body>
 <script>
 // Lấy danh sách các item từ HTML
 const Items = document.querySelectorAll('.list-game-history__item');
 const items = Array.from(Items).filter(item => item.id !== 'header');
+const pageLink = document.querySelector('.page-link-text');
+const nextPageLink = document.querySelector('.next-page');
+const previousPageLink = document.querySelector('.previous-page');
+
 // Số lượng item trên mỗi trang
 const itemsPerPage = 5;
 
@@ -80,7 +87,18 @@ function showPage(page) {
     // Tính chỉ số bắt đầu và chỉ số kết thúc của item trên trang hiện tại
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-
+    if (page == 1){
+        previousPageLink.classList.add('disabled_link');  
+    }
+    else{
+        previousPageLink.classList.remove('disabled_link');  
+    }
+    if (page >= totalPages){
+        nextPageLink.classList.add('disabled_link');    
+    }
+    else{
+        nextPageLink.classList.remove('disabled_link');     
+    }
     // Ẩn tất cả các item
     items.forEach(item => {
         item.style.display = 'none';
@@ -95,24 +113,23 @@ function showPage(page) {
     console.log(currentPage);
     pageNumber.textContent = currentPage.toString();
 }
-const pageLink = document.querySelector('.page-link-text');
 pageLink.addEventListener('click', function(event){
     event.preventDefault();
 });
-const nextPageLink = document.querySelector('.fa-arrow-right');
 nextPageLink.addEventListener('click', function(event) {
     event.preventDefault();
     currentPage++;
     if (currentPage > totalPages) {
+        nextPageLink.classList.add('disabled_link');
         currentPage = totalPages;
     }
     showPage(currentPage);
 });
-const previousPageLink = document.querySelector('.fa-arrow-left');
 previousPageLink.addEventListener('click', function(event) {
     event.preventDefault();
     currentPage--;
     if (currentPage < 1) {
+        previousPageLink.classList.add('disabled_link');
         currentPage = 1;
     }
     showPage(currentPage);
