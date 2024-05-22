@@ -23,7 +23,20 @@ class UserRegisterForm(forms.ModelForm):
         if password and confirm_password and password != confirm_password:
             self.add_error('confirm_password', "Password không trùng khớp")
         return cleaned_data
-
+class UserChangePasswordForm(forms.Form):
+    current_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'current-password', 'placeholder': 'Nhập mật khẩu mới'}), label="Current password *")
+    new_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'new-password', 'placeholder': 'Nhập mật khẩu mới'}), label="New password *")
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 're-password', 'placeholder': 'Xác nhận mật khẩu mới'}), label="Confirm new password *")
+    def clean(self):
+        cleaned_data = super().clean()
+        current_password = cleaned_data.get("current_password")
+        new_password = cleaned_data.get("new_password")
+        confirm_password = cleaned_data.get("confirm_password")
+        if new_password and confirm_password and new_password != confirm_password:
+            self.add_error('confirm_password', "Password không trùng khớp")
+        if len(new_password) < 8 or len(new_password) > 20:
+            self.add_error('new_password', "Password từ 8 đến 20 kí tự")
+        return cleaned_data
 class UserLoginForm(forms.ModelForm):
     class Meta:
         model = User

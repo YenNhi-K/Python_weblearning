@@ -2,12 +2,10 @@ from django.shortcuts import render,redirect
 from django.urls import reverse
 from .models import Test, History
 from dictionary.models import Dictionary
-from user.views import home
 from user.models import User
 import pandas as pd
 from django.http import HttpResponse
 import random
-
 
 from django.core.cache import cache
 # Create your views here.
@@ -59,10 +57,10 @@ def check(request):
                         'type': 1
                     })
         else:
-            times = int(number_of_questions) / test.number_of_words 
-            for _ in range (times):
+            times = int(number_of_questions) // test.number_of_words + 1
+            for i in range (times):
                 random.shuffle(list_dictionary)
-                for _ in range(int(number_of_questions)):
+                for _ in range(test.number_of_words):
                     word_or_meaning = random.randint(0,1)
                     if word_or_meaning == 0:
                         list_question.append({
@@ -94,16 +92,12 @@ def quiz(request):
         list_choice_meanings = [item.meaning for item in list_dictionary]
         # print(list_dictionary)
         list_question = []
-        while(len(list_choice_words) < 4):
-            list_choice_words.append(" ")
-        while(len(list_choice_meanings) < 4):
-            list_choice_meanings.append(" ")
         if test.number_of_words >= int(number_of_questions):
             random.shuffle(list_dictionary)
             for _ in range(int(number_of_questions)):
                 word_or_meaning = random.randint(0,1)
                 if word_or_meaning == 0:
-                    list_choice = [element for element in list_choice_meanings if element != list_dictionary[_].meaning]
+                    list_choice = [element.meaning for element in list_dictionary if element.meaning != list_dictionary[_].meaning]
                     random_choice = random.sample(list_choice, 3)
                     random_choice.append(list_dictionary[_].meaning)
                     list_question.append({
@@ -113,7 +107,7 @@ def quiz(request):
                         'type': 0
                     })
                 else:
-                    list_choice = [element for element in list_choice_words if element != list_dictionary[_].word]
+                    list_choice = [element.word for element in list_dictionary if element.word != list_dictionary[_].word]
                     random_choice = random.sample(list_choice, 3)
                     random_choice.append(list_dictionary[_].word)
                     list_question.append({
@@ -122,6 +116,33 @@ def quiz(request):
                         'list_choice': random_choice,
                         'type': 1
                     })
+        else:
+            times = int(number_of_questions) // test.number_of_words + 1
+            for i in range (times):
+                random.shuffle(list_dictionary)
+                for _ in range(test.number_of_words):
+                    word_or_meaning = random.randint(0,1)
+                    if word_or_meaning == 0:
+                        list_choice = [element.meaning for element in list_dictionary if element.meaning != list_dictionary[_].meaning]
+                        random_choice = random.sample(list_choice, 3)
+                        random_choice.append(list_dictionary[_].meaning)
+                        list_question.append({
+                            'question': list_dictionary[_].word,
+                            'answer': list_dictionary[_].meaning,
+                            'list_choice': random_choice,
+                            'type': 0
+                        })
+                    else:
+                        list_choice = [element.word for element in list_dictionary if element.word != list_dictionary[_].word]
+                        random_choice = random.sample(list_choice, 3)
+                        random_choice.append(list_dictionary[_].word)
+                        list_question.append({
+                            'question': list_dictionary[_].meaning,
+                            'answer': list_dictionary[_].word,
+                            'list_choice': random_choice,
+                            'type': 1
+                        })
+
         cache.set('list_question', list_question)
         return list_question
 
@@ -198,6 +219,7 @@ def test(request):
     # count = 0
     if request.method == 'POST':
         test_type = request.POST.get('type', None)
+        print(test_type)
         if test_type == 'check':
             list_question = check(request)
             request.method = 'GET'
@@ -208,7 +230,7 @@ def test(request):
             return quiz_check(request, 0)
         # print(list_question)
     # return home(request)
-    
 
-def test_home(request):
-    return home(request)
+
+# def test_home(request):
+#     return home(request)
