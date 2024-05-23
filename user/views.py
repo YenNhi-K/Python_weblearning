@@ -60,7 +60,7 @@ def login(request):
 
 def logout(request):
     del request.session['user_id']
-    del request.session['username']
+    request.session.pop('username', None)
     return redirect(reverse('login'))
 
 def change_password(request):
@@ -104,7 +104,7 @@ def voca_list(request, test_id):
 
 def history(request, test_id):
     test = Test.objects.filter(test_id=test_id).first()
-    list_history = list(History.objects.filter(test=test))
+    list_history = list(History.objects.filter(test=test).order_by('-test_time'))
     return render(request, 'user/history.html', {'list': list_history, 'test': test})
 
 def delete_test(request):

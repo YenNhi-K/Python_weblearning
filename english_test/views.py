@@ -98,7 +98,7 @@ def quiz(request):
                 word_or_meaning = random.randint(0,1)
                 print(word_or_meaning)
                 if word_or_meaning == 0:
-                    list_choice = [element.meaning for element in list_dictionary ]
+                    list_choice = [element.meaning for element in list_dictionary if element.word != list_dictionary[_].word]
                     random_choice = random.sample(list_choice, 3)
                     random_choice.append(list_dictionary[_].meaning)
                     list_question.append({
@@ -108,7 +108,7 @@ def quiz(request):
                         'type': 0
                     })
                 else:
-                    list_choice = [element.word for element in list_dictionary]
+                    list_choice = [element.word for element in list_dictionary if element.meaning != list_dictionary[_].meaning]
                     random_choice = random.sample(list_choice, 3)
                     random_choice.append(list_dictionary[_].word)
                     list_question.append({
@@ -124,7 +124,7 @@ def quiz(request):
                 for _ in range(test.number_of_words):
                     word_or_meaning = random.randint(0,1)
                     if word_or_meaning == 0:
-                        list_choice = [element.meaning for element in list_dictionary ]
+                        list_choice = [element.meaning for element in list_dictionary if element.word != list_dictionary[_].word]
                         random_choice = random.sample(list_choice, 3)
                         random_choice.append(list_dictionary[_].meaning)
                         list_question.append({
@@ -134,7 +134,7 @@ def quiz(request):
                             'type': 0
                         })
                     else:
-                        list_choice = [element.word for element in list_dictionary ]
+                        list_choice = [element.word for element in list_dictionary if element.meaning != list_dictionary[_].meaning]
                         random_choice = random.sample(list_choice, 3)
                         random_choice.append(list_dictionary[_].word)
                         list_question.append({
