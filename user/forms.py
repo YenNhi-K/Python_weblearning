@@ -24,7 +24,7 @@ class UserRegisterForm(forms.ModelForm):
             self.add_error('confirm_password', "Password không trùng khớp")
         return cleaned_data
 class UserChangePasswordForm(forms.Form):
-    current_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'current-password', 'placeholder': 'Nhập mật khẩu mới'}), label="Current password *")
+    current_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'current-password', 'placeholder': 'Nhập mật khẩu hiện tại'}), label="Current password *")
     new_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'new-password', 'placeholder': 'Nhập mật khẩu mới'}), label="New password *")
     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 're-password', 'placeholder': 'Xác nhận mật khẩu mới'}), label="Confirm new password *")
     def clean(self):

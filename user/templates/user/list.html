@@ -21,7 +21,7 @@
               </button>
               <ul class="dropdown-menu dropdown-menu-end mt-3">
                   <li class="drop_item_user"><label class="mar-l-1"></label>{{ username }}</label></li>
-                <li><a class="dropdown-item drop_item" href="#"><i class="mar-r-1 fas fa-lock"></i>Thay đổi mật khẩu</a></li>
+                <li><a class="dropdown-item drop_item" href="{% url 'change_password' %}"><i class="mar-r-1 fas fa-lock"></i>Thay đổi mật khẩu</a></li>
                 <li><a class="dropdown-item drop_item" href="{% url 'logout' %}"><i class="mar-r-1 fas fa-sign-out-alt"></i>Đăng xuất</a></li>
               </ul>
             </div>
@@ -148,20 +148,12 @@ previousPageLink.addEventListener('click', function(event) {
 
 document.addEventListener('DOMContentLoaded', function() {
     var showModalBtns = document.querySelectorAll('.fa-trash[data-bs-toggle="modal"]');
-    // var uploadFormNoteLabel = document.querySelector('.number-form_note');
-    // console.log(uploadFormNoteLabel.textContent)
     showModalBtns.forEach(function(btn) {
         btn.addEventListener('click', function(event) {
-            // var numberOfWords = event.currentTarget.getAttribute('data-number-of-words');
-            // console.log(numberOfWords)
             var test_id = event.currentTarget.getAttribute('data-test-id');
             console.log(test_id);
             var testInput = document.getElementById('test_id');
             testInput.value = test_id;
-            // var test_id = event.currentTarget.getAttribute('data-test-id');
-            // var idInput = document.getElementById('test_id');
-            // idInput.value = test_id;
-            // uploadFormNoteLabel.textContent = "Số lượng từ: " + numberOfWords;
         });
     });
 });

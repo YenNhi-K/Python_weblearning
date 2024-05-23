@@ -12,12 +12,14 @@
 <body class="image_div_game">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <div class="container check_game game_content row">
+        {% if question %}
         <div class="game timer col col-3">
+            {% if correct is None%}
             <div class="circle time_board">
                 <span id="timer_count" class=" bold-font">10</span>
             </div>
+            {% endif %}
         </div>
-        {% if question %}
         <div class="game_content_item col col-6">
             <div class="game_question bold-font">
                 {% if question.type == 0 %}
@@ -28,7 +30,6 @@
             </div>
             <form action="" method="POST" id="check-form">
                 {% csrf_token %}
-                
                     <div class="game_answer_container">
                         <div class="row game_answer_option">
                             <input type="button" class="col col-5 game_option" id="optionA" value="{{ question.list_choice.0 }}"></input>
@@ -63,13 +64,6 @@
     const myButtons = document.querySelectorAll('.game_option');
     const hiddenInput = document.getElementById('selected_option');
     var correct_answer = '{{question.answer}}'
-    // console.log(myButtons);
-    // myButtons.forEach(button=>{
-    //     if (button.value == correct_answer){
-    //         button.setAttribute('data-value',1);
-    //     }
-    //     else button.setAttribute('data-value',0);
-    // })
     document.addEventListener('DOMContentLoaded', function() {
         const correct = {{ correct}};
         const answer = "{{ question.answer }}";
@@ -91,12 +85,10 @@
             });
         }
         var testCheckLink = document.getElementById('test-check-link');
-        
         // Kiểm tra xem nút có tồn tại hay không
         if (testCheckLink) {
             testCheckLink.addEventListener('click', function(event) {
                 event.preventDefault();
-                
                 // Kiểm tra giá trị của correct
                 {% if correct is None %}
                 var correct = null;
@@ -120,15 +112,10 @@
                 var url = "{% url 'quiz_check' 0 0 %}";
                 var replaced = '/' + no_question + '/' + no_correct + '/';
                 console.log(replaced);
-                
                 // Cắt bỏ 5 ký tự cuối của URL
                 url = url.slice(0, -5);
-                
                 // Tạo URL mới bằng cách nối phần đã cắt và phần thay thế
                 var new_url = url.concat(replaced);
-                
-                console.log(new_url);
-                
                 // Chuyển hướng đến URL mới
                 window.location.href = new_url;
             });
@@ -189,8 +176,6 @@
                 var no_question;
                 
                 if (correct == 0) {
-                    // var no_correct = parseInt(document.getElementById('no_correct').value, 10);
-                    // document.getElementById('no_correct').value = no_correct + 1;
                     no_correct = {{no_correct}} + 1;
                 }
                 no_question = {{no_question}};

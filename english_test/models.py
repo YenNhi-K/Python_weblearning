@@ -6,7 +6,6 @@ class Test(models.Model):
     test_id = models.AutoField(primary_key=True) 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now=True)
-    # number_of_question = models.IntegerField(max_length=50)
     number_of_words = models.IntegerField(default=0)
     topic = models.CharField(max_length=50, default='')
 

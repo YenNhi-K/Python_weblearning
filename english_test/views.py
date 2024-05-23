@@ -10,21 +10,30 @@ import random
 from django.core.cache import cache
 # Create your views here.
 
-def import_file(request):
+def clean_file(request):
     if request.method == 'POST':
-        # print(request.FILES)
         topic = request.POST.get('topic',None)
         file = request.FILES['file']
         if file.name.endswith('.csv'):
             df = pd.read_csv(file, header=None)
         elif file.name.endswith(('.xls', '.xlsx')):
             df = pd.read_excel(file, header=None)
-        
-        user = User.objects.filter(user_id=request.session["user_id"]).first()
+        df = df.dropna(how='all')
+        df = df.drop_duplicates()
 
+def import_file(request):
+    if request.method == 'POST':
+        topic = request.POST.get('topic',None)
+        file = request.FILES['file']
+        if file.name.endswith('.csv'):
+            df = pd.read_csv(file, header=None)
+        elif file.name.endswith(('.xls', '.xlsx')):
+            df = pd.read_excel(file, header=None)
+        df = df.dropna(how='all')
+        df = df.drop_duplicates()
+        user = User.objects.filter(user_id=request.session["user_id"]).first()
         test = Test(user=user, number_of_words=len(df), topic=topic)
         test.save()
-        # test_id = test.test_id
         for index, row in df.iterrows():
             dict = Dictionary(test=test, word=row[0], meaning=row[1])
             dict.save()
@@ -38,7 +47,6 @@ def check(request):
         print(number_of_questions, test_id)
         test = Test.objects.filter(test_id=test_id).first()
         list_dictionary = list(Dictionary.objects.filter(test=test))
-        # print(list_dictionary)
         list_question = []
         if test.number_of_words >= int(number_of_questions):
             random.shuffle(list_dictionary)
@@ -76,28 +84,21 @@ def check(request):
                         })
         cache.set('list_question', list_question)
         return list_question
-def remove_element_from_list(my_list, element):
-    # Sử dụng vòng lặp để loại bỏ tất cả các phần tử có giá trị 'a' khỏi danh sách
-    while element in my_list:
-        my_list.remove(element)
 def quiz(request):
     if request.method == 'POST':
         number_of_questions = request.POST.get('number_of_questions', None)
         test_id = request.POST.get('test_id', None)
         cache.set('test_id', test_id)
-        # print(number_of_questions, test_id)
         test = Test.objects.filter(test_id=test_id).first()
         list_dictionary = list(Dictionary.objects.filter(test=test))
-        list_choice_words = [item.word for item in list_dictionary]
-        list_choice_meanings = [item.meaning for item in list_dictionary]
-        # print(list_dictionary)
         list_question = []
         if test.number_of_words >= int(number_of_questions):
             random.shuffle(list_dictionary)
             for _ in range(int(number_of_questions)):
                 word_or_meaning = random.randint(0,1)
+                print(word_or_meaning)
                 if word_or_meaning == 0:
-                    list_choice = [element.meaning for element in list_dictionary if element.meaning != list_dictionary[_].meaning]
+                    list_choice = [element.meaning for element in list_dictionary ]
                     random_choice = random.sample(list_choice, 3)
                     random_choice.append(list_dictionary[_].meaning)
                     list_question.append({
@@ -107,7 +108,7 @@ def quiz(request):
                         'type': 0
                     })
                 else:
-                    list_choice = [element.word for element in list_dictionary if element.word != list_dictionary[_].word]
+                    list_choice = [element.word for element in list_dictionary]
                     random_choice = random.sample(list_choice, 3)
                     random_choice.append(list_dictionary[_].word)
                     list_question.append({
@@ -123,7 +124,7 @@ def quiz(request):
                 for _ in range(test.number_of_words):
                     word_or_meaning = random.randint(0,1)
                     if word_or_meaning == 0:
-                        list_choice = [element.meaning for element in list_dictionary if element.meaning != list_dictionary[_].meaning]
+                        list_choice = [element.meaning for element in list_dictionary ]
                         random_choice = random.sample(list_choice, 3)
                         random_choice.append(list_dictionary[_].meaning)
                         list_question.append({
@@ -133,7 +134,7 @@ def quiz(request):
                             'type': 0
                         })
                     else:
-                        list_choice = [element.word for element in list_dictionary if element.word != list_dictionary[_].word]
+                        list_choice = [element.word for element in list_dictionary ]
                         random_choice = random.sample(list_choice, 3)
                         random_choice.append(list_dictionary[_].word)
                         list_question.append({
@@ -151,9 +152,7 @@ def test_check(request, no_question, no_correct=0):
     list_question = cache.get('list_question')
     print(list_question)
     correct = None
-    # print(no_question, len(list_question))
     question = None
-    # print(question)
     user_answer = ""
     if no_question == len(list_question):
         test_id = cache.get('test_id')
@@ -185,9 +184,7 @@ def quiz_check(request, no_question, no_correct=0):
     list_question = cache.get('list_question')
     print(list_question)
     correct = None
-    # print(no_question, len(list_question))
     question = None
-    # print(question)
     user_answer = ""
     if no_question == len(list_question):
         test_id = cache.get('test_id')
@@ -210,13 +207,10 @@ def quiz_check(request, no_question, no_correct=0):
                 correct = 0
             else:
                 correct = 1
-            # print(correct)
             print(question)
     return render(request, 'test/quiz_game.html', {'question': question, 'no_question': no_question, 'no_correct': no_correct, 'correct': correct, 'user_answer': user_answer})
  
-
 def test(request):
-    # count = 0
     if request.method == 'POST':
         test_type = request.POST.get('type', None)
         print(test_type)
@@ -228,9 +222,3 @@ def test(request):
             list_question = quiz(request)
             request.method = 'GET'
             return quiz_check(request, 0)
-        # print(list_question)
-    # return home(request)
-
-
-# def test_home(request):
-#     return home(request)
