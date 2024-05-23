@@ -41,7 +41,7 @@ def import_file(request):
     
 def check(request):
     if request.method == 'POST':
-        number_of_questions = request.POST.get('number_of_questions', None)
+        number_of_questions = int(request.POST.get('number_of_questions', None))
         test_id = request.POST.get('test_id', None)
         cache.set('test_id', test_id)
         print(number_of_questions, test_id)
@@ -65,28 +65,30 @@ def check(request):
                         'type': 1
                     })
         else:
-            times = int(number_of_questions) // test.number_of_words + 1
-            for i in range (times):
-                random.shuffle(list_dictionary)
-                for _ in range(test.number_of_words):
-                    word_or_meaning = random.randint(0,1)
-                    if word_or_meaning == 0:
-                        list_question.append({
-                            'question': list_dictionary[_].word,
-                            'answer': list_dictionary[_].meaning,
-                            'type': 0,
-                        })
-                    else:
-                        list_question.append({
-                            'question': list_dictionary[_].meaning,
-                            'answer': list_dictionary[_].word,
-                            'type': 1,
-                        })
+            list_dictionarys = list_dictionary.copy()
+            while len(list_dictionarys) < number_of_questions: 
+                list_dictionarys.append(random.choice(list_dictionary))
+            random.shuffle(list_dictionarys)
+            for _ in range(len(list_dictionarys)):
+                if number_of_questions == 0: break
+                word_or_meaning = random.randint(0,1)
+                if word_or_meaning == 0:
+                    list_question.append({
+                        'question': list_dictionarys[_].word,
+                        'answer': list_dictionarys[_].meaning,
+                        'type': 0,
+                    })
+                else:
+                    list_question.append({
+                        'question': list_dictionarys[_].meaning,
+                        'answer': list_dictionarys[_].word,
+                        'type': 1,
+                    })
         cache.set('list_question', list_question)
         return list_question
 def quiz(request):
     if request.method == 'POST':
-        number_of_questions = request.POST.get('number_of_questions', None)
+        number_of_questions = int(request.POST.get('number_of_questions', None))
         test_id = request.POST.get('test_id', None)
         cache.set('test_id', test_id)
         test = Test.objects.filter(test_id=test_id).first()
@@ -101,6 +103,7 @@ def quiz(request):
                     list_choice = [element.meaning for element in list_dictionary if element.word != list_dictionary[_].word]
                     random_choice = random.sample(list_choice, 3)
                     random_choice.append(list_dictionary[_].meaning)
+                    random.shuffle(random_choice)
                     list_question.append({
                         'question': list_dictionary[_].word,
                         'answer': list_dictionary[_].meaning,
@@ -111,6 +114,7 @@ def quiz(request):
                     list_choice = [element.word for element in list_dictionary if element.meaning != list_dictionary[_].meaning]
                     random_choice = random.sample(list_choice, 3)
                     random_choice.append(list_dictionary[_].word)
+                    random.shuffle(random_choice)
                     list_question.append({
                         'question': list_dictionary[_].meaning,
                         'answer': list_dictionary[_].word,
@@ -118,32 +122,34 @@ def quiz(request):
                         'type': 1
                     })
         else:
-            times = int(number_of_questions) // test.number_of_words + 1
-            for i in range (times):
-                random.shuffle(list_dictionary)
-                for _ in range(test.number_of_words):
-                    word_or_meaning = random.randint(0,1)
-                    if word_or_meaning == 0:
-                        list_choice = [element.meaning for element in list_dictionary if element.word != list_dictionary[_].word]
-                        random_choice = random.sample(list_choice, 3)
-                        random_choice.append(list_dictionary[_].meaning)
-                        list_question.append({
-                            'question': list_dictionary[_].word,
-                            'answer': list_dictionary[_].meaning,
-                            'list_choice': random_choice,
-                            'type': 0
-                        })
-                    else:
-                        list_choice = [element.word for element in list_dictionary if element.meaning != list_dictionary[_].meaning]
-                        random_choice = random.sample(list_choice, 3)
-                        random_choice.append(list_dictionary[_].word)
-                        list_question.append({
-                            'question': list_dictionary[_].meaning,
-                            'answer': list_dictionary[_].word,
-                            'list_choice': random_choice,
-                            'type': 1
-                        })
-
+            list_dictionarys = list_dictionary.copy()
+            while len(list_dictionarys) < number_of_questions: 
+                list_dictionarys.append(random.choice(list_dictionary))
+            random.shuffle(list_dictionarys)
+            for _ in range(len(list_dictionarys)):
+                word_or_meaning = random.randint(0,1)
+                if word_or_meaning == 0:
+                    list_choice = [element.meaning for element in list_dictionary if element.word != list_dictionarys[_].word]
+                    random_choice = random.sample(list_choice, 3)
+                    random_choice.append(list_dictionarys[_].meaning)
+                    random.shuffle(random_choice)
+                    list_question.append({
+                        'question': list_dictionarys[_].word,
+                        'answer': list_dictionarys[_].meaning,
+                        'list_choice': random_choice,
+                        'type': 0
+                    })
+                else:
+                    list_choice = [element.word for element in list_dictionary if element.meaning != list_dictionarys[_].meaning]
+                    random_choice = random.sample(list_choice, 3)
+                    random_choice.append(list_dictionarys[_].word)
+                    random.shuffle(random_choice)
+                    list_question.append({
+                        'question': list_dictionarys[_].meaning,
+                        'answer': list_dictionarys[_].word,
+                        'list_choice': random_choice,
+                        'type': 1
+                    })
         cache.set('list_question', list_question)
         return list_question
 
